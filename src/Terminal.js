@@ -14,6 +14,8 @@ const TerminalComponent = () => {
   const xterm = useRef(null);
   const fitAddon = useRef(null);
   const [input, setInput] = useState(""); // ✅ State to handle input field
+  const [token, setToken] = useState(""); // ✅ State to handle input field
+
 
   // console.log("TerminalComponent")
 
@@ -96,6 +98,17 @@ const TerminalComponent = () => {
         />
         <button type="submit">Run</button>
       </form>
+      <div>
+      <button style={{ padding: "5px", fontSize: "16px", width: "300px",marginTop:50 }} onClick={()=>{socket.emit("run_fastlane");}}>Run Fastlane</button>
+      </div>
+      <input
+          type="text"
+          value={token}
+          onChange={(e) => setToken(e.target.value)}
+          placeholder="Token..."
+          style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop:200 }}
+        />
+      <button style={{ padding: "5px", fontSize: "16px", width: "300px",marginTop:50 }} onClick={()=>{socket.emit("send_2fa",token);}}>Submit token</button>
     </div>
   );
 };
