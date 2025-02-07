@@ -15,7 +15,7 @@ const TerminalComponent = () => {
   const fitAddon = useRef(null);
   const [input, setInput] = useState(""); // ✅ State to handle input field
   const [token, setToken] = useState(""); // ✅ State to handle input field
-
+  const [appleSessionValue, setAppleSessionResult] = useState("");
 
   // console.log("TerminalComponent")
 
@@ -24,6 +24,21 @@ const TerminalComponent = () => {
     xterm.current.write(data);
     return () => {
       socket.off("output", handleOutPut);
+    };
+  }, []);
+
+  const checkAppleSessionOutput = useCallback((data) => {
+    setAppleSessionResult(data)
+    return () => {
+      socket.off("checkAppleSessionOutput", checkAppleSessionOutput);
+    };
+  }, []);
+
+  const sessionCleared = useCallback((data) => {
+    console.log(data);
+    setAppleSessionResult(data);
+    return () => {
+      socket.off("sessionCleared", sessionCleared);
     };
   }, []);
 
@@ -64,10 +79,15 @@ const TerminalComponent = () => {
     socket.off("output", handleOutPut);
     socket.on("output", handleOutPut);
 
+    socket.on("checkAppleSessionOutput", checkAppleSessionOutput);
+    socket.on("sessionCleared", sessionCleared);
+
     return () => {
       socket.off("output", handleOutPut);
+      socket.off("checkAppleSessionOutput", checkAppleSessionOutput);
+      socket.off("sessionCleared", sessionCleared);
     };
-  }, [handleOutPut]);
+  }, [checkAppleSessionOutput, handleOutPut, sessionCleared]);
 
   // ✅ Handle manual command submission
   const handleSubmit = (e) => {
@@ -82,10 +102,10 @@ const TerminalComponent = () => {
   return (
     <div style={{ textAlign: "center" }}>
       <h2>Interactive Terminal</h2>
-      <div
-        ref={terminalRef}
-        style={{ width: "80%", height: "400px", border: "1px solid black", margin: "auto" }}
-      ></div>
+        <div
+          ref={terminalRef}
+          style={{ width: "80%", height: "400px", border: "1px solid black", margin: "auto" }}
+        ></div>
 
       {/* ✅ Input field for manual command execution */}
       <form onSubmit={handleSubmit} style={{ marginTop: "10px" }}>
@@ -99,18 +119,35 @@ const TerminalComponent = () => {
         <button type="submit">Run</button>
       </form>
       <div>
-      <button style={{ padding: "5px", fontSize: "16px", width: "300px",marginTop:50 }} onClick={()=>{socket.emit("run_fastlane");}}>Run Fastlane</button>
+        <h2>{appleSessionValue}</h2>
+        <button style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50 }} onClick={() => { socket.emit("check_fastlane"); }}>Check Apple Session</button>
+      </div>
+      <div>
+
+        <div>
+          <button
+            style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50 }}
+            onClick={() => { socket.emit("clear_fastlane_session"); }}
+          >
+            Clear Fastlane Session
+          </button>
+        </div>
+
+        <button style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50 }} onClick={() => { socket.emit("run_fastlane"); }}>Run Fastlane</button>
       </div>
       <input
-          type="text"
-          value={token}
-          onChange={(e) => setToken(e.target.value)}
-          placeholder="Token..."
-          style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop:200 }}
-        />
-      <button style={{ padding: "5px", fontSize: "16px", width: "300px",marginTop:50 }} onClick={()=>{socket.emit("send_2fa",token);}}>Submit token</button>
+        type="text"
+        value={token}
+        onChange={(e) => setToken(e.target.value)}
+        placeholder="Token..."
+        style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50 }}
+      />
+      <button style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50 }} onClick={() => { socket.emit("send_2fa", token); }}>Submit token</button>
     </div>
   );
 };
 
 export default TerminalComponent;
+
+// helo
+

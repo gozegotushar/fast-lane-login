@@ -7,6 +7,7 @@ const os = require("os");
 const { exec } = require("child_process")
 const { spawn } = require("child_process");
 const fs = require('fs');
+const path = require("path");
 const app = express();
 app.use(cors());
 
@@ -90,7 +91,65 @@ io.on("connection", (socket) => {
       fastlaneProcess.stdin.write(`${code}\n`);
     }
   });
+
+
+  const FASTLANE_SESSION_FILE = ".fastlane_session"; // Path to stored session file
+
+  socket.on("check_fastlane", () => {
+    console.log("🔍 Checking Fastlane session...");
+  
+    if (fs.existsSync(FASTLANE_SESSION_FILE)) {
+      const sessionData = fs.readFileSync(FASTLANE_SESSION_FILE, "utf8").trim();
+  
+      if (sessionData.length > 0) {
+        console.log("✅ Fastlane session is valid!");
+        socket.emit("checkAppleSessionOutput", "✅ Fastlane session is valid!");
+        return;
+      }
+    }
+  
+    console.log("❌ Fastlane session is missing or expired.");
+    socket.emit("checkAppleSessionOutput", "❌ Fastlane session is missing or expired.");
+  });
+
+  socket.on("clear_fastlane_session", () => {
+    console.log("🧹 Clearing Fastlane session...");
+  
+    const FASTLANE_SESSION_FILE = ".fastlane_session"; // Custom session file
+    const FASTLANE_DIR = path.join(os.homedir(), ".fastlane"); // Fastlane config directory
+  
+    try {
+      // ✅ Remove custom session file (if it exists)
+      if (fs.existsSync(FASTLANE_SESSION_FILE)) {
+        fs.unlinkSync(FASTLANE_SESSION_FILE);
+        console.log("✅ Fastlane session file deleted.");
+      } else {
+        console.log("⚠️ No custom session file found.");
+      }
+  
+      // ✅ Remove Fastlane keychain & Apple session files
+      if (fs.existsSync(FASTLANE_DIR)) {
+        fs.rmSync(FASTLANE_DIR, { recursive: true, force: true });
+        console.log("✅ Fastlane authentication files deleted.");
+      } else {
+        console.log("⚠️ No Fastlane authentication directory found.");
+      }
+  
+      // ✅ Remove environment variable
+      delete process.env.FASTLANE_SESSION;
+      console.log("✅ FASTLANE_SESSION environment variable removed.");
+  
+      // ✅ Notify frontend that session is cleared
+      socket.emit("sessionCleared", "✅ Fastlane session fully cleared!");
+    } catch (error) {
+      console.error("❌ Error clearing Fastlane session:", error);
+      socket.emit("sessionCleared", "❌ Failed to clear Fastlane session.");
+    }
+  });
+
+  
 });
+
 
 server.listen(3000, () => {
   console.log("Server running on http://localhost:3000");
