@@ -19,6 +19,8 @@ const TerminalComponent = () => {
   const [appleTeamInfoDetails, setAppleTeamInfoDetails] = useState("");
   const [appleCertificates, setAppleCertificatesStatus] = useState("");
   const [downloadAppleCertificatesStatus, setDownloadAppleCertificatesStatus] = useState("");
+  const [appleMultipleTeamInfoDetails, setAppleMultipleTeamInfoDetails] = useState("");
+  const [appleMultipleTeamInfoCerts, setAppleMultipleTeamInfoCerts] = useState("");
 
   // console.log("TerminalComponent")
 
@@ -96,6 +98,23 @@ const TerminalComponent = () => {
     };
   }, []);
 
+  const fetchMultipleTeamData = useCallback((data) => {
+    console.log(data);
+    setAppleMultipleTeamInfoDetails(JSON.stringify(data));
+    return () => {
+      socket.off("fetchMultipleTeamData", fetchMultipleTeamData);
+    };
+  }, []);
+
+  const downloadMultipleTeamCerts = useCallback((data) => {
+    console.log(data);
+    setAppleMultipleTeamInfoCerts(JSON.stringify(data));
+    return () => {
+      socket.off("downloadMultipleTeamCerts", downloadMultipleTeamCerts);
+    };
+  }, []);
+  
+
   useEffect(() => {
     if (!xterm.current) {
       xterm.current = new Terminal({
@@ -135,13 +154,17 @@ const TerminalComponent = () => {
 
     socket.on("checkAppleSessionOutput", checkAppleSessionOutput);
     socket.on("sessionCleared", sessionCleared);
+    socket.on("fetchMultipleTeamData", fetchMultipleTeamData);
+    socket.on("downloadMultipleTeamCerts", downloadMultipleTeamCerts);
 
     return () => {
       socket.off("output", handleOutPut);
       socket.off("checkAppleSessionOutput", checkAppleSessionOutput);
       socket.off("sessionCleared", sessionCleared);
+      socket.off("fetchMultipleTeamData", fetchMultipleTeamData);
+      socket.off("downloadMultipleTeamCerts", downloadMultipleTeamCerts);
     };
-  }, [checkAppleSessionOutput, handleOutPut, sessionCleared]);
+  }, [checkAppleSessionOutput, downloadMultipleTeamCerts, fetchMultipleTeamData, handleOutPut, sessionCleared]);
 
   // ✅ Handle manual command submission
   const handleSubmit = (e) => {
@@ -184,6 +207,11 @@ const TerminalComponent = () => {
       </div>
 
       <div>
+        <p>{appleMultipleTeamInfoDetails}</p>
+        <button style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50, backgroundColor: 'green' }} onClick={() => { socket.emit("fetchMultipleTeamData"); }}>Get Apple Multiple Team Info</button>
+      </div>
+
+      <div>
         <p>{appleCertificates}</p>
         <button style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50, backgroundColor: 'green' }} onClick={fetchAppleCertificates}>Get Apple Certificates</button>
       </div>
@@ -191,6 +219,11 @@ const TerminalComponent = () => {
       <div>
         <p>{downloadAppleCertificatesStatus}</p>
         <button style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50, backgroundColor: 'green' }} onClick={docwnloadAppleCertificates}>Download Apple Certificates</button>
+      </div>
+
+      <div>
+        <p>{appleMultipleTeamInfoCerts}</p>
+        <button style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50, backgroundColor: 'green' }} onClick={() => { socket.emit("downloadMultipleTeamCerts"); }}>Donwload Apple Multiple Team Certs</button>
       </div>
 
       <div>

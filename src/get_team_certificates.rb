@@ -1,24 +1,10 @@
 require 'spaceship'
 require 'json'
 
-# Authenticate with Apple ID (uses Fastlane session if available)
+email = ENV['FASTLANE_USER']
+password = ENV['FASTLANE_PASSWORD']
+
 Spaceship::ConnectAPI.login(ENV['FASTLANE_USER'])
-
-# # ✅ Fetch all certificates
-# certificates = Spaceship::Portal.certificate.all
-
-# # ✅ Create a directory to store certificates
-# Dir.mkdir("certificates") unless Dir.exist?("certificates")
-
-# # ✅ Iterate through each certificate and download it
-# certificates.each do |cert|
-#   cert_name = "#{cert.id}_#{cert.name}.cer"  # Unique filename
-#   cert_path = File.join("certificates", cert_name)
-
-#   File.write(cert_path, cert.download_raw)
-  
-#   puts "✅ Downloaded: #{cert_name}"
-# end
 certs = Spaceship::Portal.certificate.all
 
 certs_json = certs.map do |cert|

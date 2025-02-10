@@ -11,6 +11,9 @@ const path = require("path");
 const app = express();
 app.use(cors());
 
+const EMAIL = 'tpandey@gozego.com';
+const PASSWORD = 'Zego1234';
+
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: { origin: "http://localhost:3001", methods: ["GET", "POST"] }, // Change port if needed
@@ -18,7 +21,7 @@ const io = socketIo(server, {
 
 
 app.get("/api/get_apple_team", (req, res) => {
-  exec("FASTLANE_USER='tpandey@gozego.com' ruby src/get_apple_team.rb", (error, stdout, stderr) => {
+  exec(`FASTLANE_USER='${EMAIL}' FASTLANE_PASSWORD='${PASSWORD}' ruby src/get_apple_team.rb`, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error: ${stderr}`);
       return res.status(500).json({ success: false, message: "Failed to fetch Apple team info." });
@@ -28,7 +31,7 @@ app.get("/api/get_apple_team", (req, res) => {
 });
 
 app.get("/api/get_apple_certificates", (req, res) => {
-  exec("FASTLANE_USER='tpandey@gozego.com' ruby src/get_team_certificates.rb", (error, stdout, stderr) => {
+  exec(`FASTLANE_USER='${EMAIL}' FASTLANE_PASSWORD='${PASSWORD}' ruby src/get_team_certificates.rb`, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error: ${stderr}`);
       return res.status(500).json({ success: false, message: `Failed to fetch Apple team certificates : reason is : + ${stderr}` });
@@ -38,7 +41,7 @@ app.get("/api/get_apple_certificates", (req, res) => {
 });
 
 app.get("/api/download_apple_certificates", (req, res) => {
-  exec("FASTLANE_USER='tpandey@gozego.com' ruby src/download_team_certificates.rb", (error, stdout, stderr) => {
+  exec(`FASTLANE_USER='${EMAIL}' FASTLANE_PASSWORD='${PASSWORD}' ruby src/download_team_certificates.rb`, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error: ${stderr}`);
       return res.status(500).json({ success: false, message: `Failed to download Apple team certificates : reason is : + ${stderr}` });
@@ -84,7 +87,7 @@ io.on("connection", (socket) => {
   socket.on("run_fastlane", () => {
     console.log("🚀 Running Fastlane script...");
 
-    const env = { ...process.env, FASTLANE_USER: "tpandey@gozego.com" };
+    const env = { ...process.env, FASTLANE_USER: EMAIL };
 
     fastlaneProcess = spawn("fastlane", ["spaceauth"], { env });
     let sessionData = '';
@@ -176,7 +179,92 @@ io.on("connection", (socket) => {
       socket.emit("sessionCleared", "❌ Failed to clear Fastlane session.");
     }
   });
+
+  socket.on("fetchMultipleTeamData", () => {
+    const env = {
+      ...process.env,
+      FASTLANE_USER: EMAIL,  // Replace with actual email variable
+      FASTLANE_PASSWORD: PASSWORD, // Replace with actual password variable
+      FASTLANE_SESSION: fs.existsSync(".fastlane_session") 
+          ? fs.readFileSync(".fastlane_session", "utf8").trim() 
+          : ""
+  };
+  
+    const fastlaneProcess = spawn("ruby", ["src/get_apple_team_multiple.rb"], { env });
+  
+    let outputData = "";
+  
+    fastlaneProcess.stdout.on("data", (data) => {
+      outputData += data.toString();
+      console.log("outputData : ",outputData);
+    });
+  
+    fastlaneProcess.stderr.on("data", (data) => {
+      console.error(`🚨 Fastlane Error: ${data.toString()}`);
+    });
+  
+    fastlaneProcess.on("close", (code) => {
+      console.log(`🔍 Raw Output: "${outputData.trim()}"`);
+  
+      if (!outputData.trim()) {
+        socket.emit("fetchMultipleTeamData", { success: false, error: "Empty response from Ruby script" });
+        return;
+      }
+  
+      try {
+        const result = JSON.parse(outputData.trim());
+        socket.emit("fetchMultipleTeamData", result);
+      } catch (error) {
+        console.error("❌ JSON Parsing Error:", error);
+        socket.emit("fetchMultipleTeamData", { success: false, error: "Invalid JSON response from Ruby script" });
+      }
+    });
+  });
+
+  socket.on("downloadMultipleTeamCerts", () => {
+    const env = {
+      ...process.env,
+      FASTLANE_USER: EMAIL,  // Replace with actual email variable
+      FASTLANE_PASSWORD: PASSWORD, // Replace with actual password variable
+      FASTLANE_SESSION: fs.existsSync(".fastlane_session") 
+          ? fs.readFileSync(".fastlane_session", "utf8").trim() 
+          : ""
+  };
+  
+    const fastlaneProcess = spawn("ruby", ["src/download_team_certificates_multiple.rb"], { env });
+  
+    let outputData = "";
+  
+    fastlaneProcess.stdout.on("data", (data) => {
+      outputData += data.toString();
+      console.log("outputData : ",outputData);
+    });
+  
+    fastlaneProcess.stderr.on("data", (data) => {
+      console.error(`🚨 Fastlane Error: ${data.toString()}`);
+    });
+  
+    fastlaneProcess.on("close", (code) => {
+      console.log(`🔍 Raw Output: "${outputData.trim()}"`);
+  
+      if (!outputData.trim()) {
+        socket.emit("downloadMultipleTeamCerts", { success: false, error: "Empty response from Ruby script" });
+        return;
+      }
+  
+      try {
+        const result = JSON.parse(outputData.trim());
+        socket.emit("downloadMultipleTeamCerts", result);
+      } catch (error) {
+        console.error("❌ JSON Parsing Error:", error);
+        socket.emit("downloadMultipleTeamCerts", { success: false, error: "Invalid JSON response from Ruby script" });
+      }
+    });
+  });
+
 });
+
+
 
 
 server.listen(3000, () => {
