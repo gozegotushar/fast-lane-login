@@ -17,6 +17,36 @@ const io = socketIo(server, {
 });
 
 
+app.get("/api/get_apple_team", (req, res) => {
+  exec("FASTLANE_USER='tpandey@gozego.com' ruby src/get_apple_team.rb", (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error: ${stderr}`);
+      return res.status(500).json({ success: false, message: "Failed to fetch Apple team info." });
+    }
+    res.json({ success: true, teamInfo: JSON.parse(stdout) });
+  });
+});
+
+app.get("/api/get_apple_certificates", (req, res) => {
+  exec("FASTLANE_USER='tpandey@gozego.com' ruby src/get_team_certificates.rb", (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error: ${stderr}`);
+      return res.status(500).json({ success: false, message: `Failed to fetch Apple team certificates : reason is : + ${stderr}` });
+    }
+    res.json({ success: true, teamInfo: JSON.parse(stdout) });
+  });
+});
+
+app.get("/api/download_apple_certificates", (req, res) => {
+  exec("FASTLANE_USER='tpandey@gozego.com' ruby src/download_team_certificates.rb", (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error: ${stderr}`);
+      return res.status(500).json({ success: false, message: `Failed to download Apple team certificates : reason is : + ${stderr}` });
+    }
+    res.json({ success: true, teamInfo: JSON.parse(stdout) });
+  });
+});
+
 io.on("connection", (socket) => {
   console.log("Client connected");
 
@@ -146,8 +176,6 @@ io.on("connection", (socket) => {
       socket.emit("sessionCleared", "❌ Failed to clear Fastlane session.");
     }
   });
-
-  
 });
 
 

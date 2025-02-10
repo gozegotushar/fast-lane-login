@@ -16,8 +16,62 @@ const TerminalComponent = () => {
   const [input, setInput] = useState(""); // ✅ State to handle input field
   const [token, setToken] = useState(""); // ✅ State to handle input field
   const [appleSessionValue, setAppleSessionResult] = useState("");
+  const [appleTeamInfoDetails, setAppleTeamInfoDetails] = useState("");
+  const [appleCertificates, setAppleCertificatesStatus] = useState("");
+  const [downloadAppleCertificatesStatus, setDownloadAppleCertificatesStatus] = useState("");
 
   // console.log("TerminalComponent")
+
+  const fetchAppleTeam = async () => {
+    setAppleTeamInfoDetails('')
+    try {
+      const response = await fetch("http://localhost:3000/api/get_apple_team");
+      const data = await response.json();
+      console.log("data : ", data)
+      if (data.success) {
+        setAppleTeamInfoDetails(JSON.stringify(data));
+      } else {
+        setAppleTeamInfoDetails("❌ Failed to fetch Apple team info.");
+      }
+    } catch (error) {
+      console.error("Error fetching Apple team:", error);
+      setAppleSessionResult("❌ API request failed.");
+    }
+  };
+
+  const fetchAppleCertificates = async () => {
+    setAppleCertificatesStatus('');
+    try {
+      const response = await fetch("http://localhost:3000/api/get_apple_certificates");
+      const data = await response.json();
+      console.log("data : ", data)
+      if (data.success) {
+        setAppleCertificatesStatus(JSON.stringify(data));
+      } else {
+        setAppleCertificatesStatus(data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching Apple team:", error);
+      setAppleCertificatesStatus("❌ API request failed.");
+    }
+  };
+
+  const docwnloadAppleCertificates = async () => {
+    setDownloadAppleCertificatesStatus('');
+    try {
+      const response = await fetch("http://localhost:3000/api/download_apple_certificates");
+      const data = await response.json();
+      console.log("data : ", data)
+      if (data.success) {
+        setDownloadAppleCertificatesStatus(JSON.stringify(data));
+      } else {
+        setDownloadAppleCertificatesStatus(data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching Apple team:", error);
+      setDownloadAppleCertificatesStatus("❌ API request failed.");
+    }
+  };
 
   const handleOutPut = useCallback((data) => {
     console.log("📩 Received from backend:", data);
@@ -102,10 +156,10 @@ const TerminalComponent = () => {
   return (
     <div style={{ textAlign: "center" }}>
       <h2>Interactive Terminal</h2>
-        <div
-          ref={terminalRef}
-          style={{ width: "80%", height: "400px", border: "1px solid black", margin: "auto" }}
-        ></div>
+      <div
+        ref={terminalRef}
+        style={{ width: "80%", height: "400px", border: "1px solid black", margin: "auto" }}
+      ></div>
 
       {/* ✅ Input field for manual command execution */}
       <form onSubmit={handleSubmit} style={{ marginTop: "10px" }}>
@@ -118,31 +172,47 @@ const TerminalComponent = () => {
         />
         <button type="submit">Run</button>
       </form>
-      <div>
-        <h2>{appleSessionValue}</h2>
-        <button style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50 }} onClick={() => { socket.emit("check_fastlane"); }}>Check Apple Session</button>
-      </div>
-      <div>
 
-        <div>
+      <div>
+        <p>{appleSessionValue}</p>
+        <button style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50, backgroundColor: 'green' }} onClick={() => { socket.emit("check_fastlane"); }}>Check Apple Session</button>
+      </div>
+
+      <div>
+        <p>{appleTeamInfoDetails}</p>
+        <button style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50, backgroundColor: 'green' }} onClick={fetchAppleTeam}>Get Apple Team Info</button>
+      </div>
+
+      <div>
+        <p>{appleCertificates}</p>
+        <button style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50, backgroundColor: 'green' }} onClick={fetchAppleCertificates}>Get Apple Certificates</button>
+      </div>
+
+      <div>
+        <p>{downloadAppleCertificatesStatus}</p>
+        <button style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50, backgroundColor: 'green' }} onClick={docwnloadAppleCertificates}>Download Apple Certificates</button>
+      </div>
+
+      <div>
           <button
-            style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50 }}
+            style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50, backgroundColor: 'red' }}
             onClick={() => { socket.emit("clear_fastlane_session"); }}
           >
             Clear Fastlane Session
           </button>
         </div>
 
-        <button style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50 }} onClick={() => { socket.emit("run_fastlane"); }}>Run Fastlane</button>
+      <button style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50, backgroundColor: 'green' }} onClick={() => { socket.emit("run_fastlane"); }}>Run Fastlane</button>
+      <div>
+        <input
+          type="text"
+          value={token}
+          onChange={(e) => setToken(e.target.value)}
+          placeholder="Token..."
+          style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50 }}
+        />
+        <button style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50, backgroundColor: 'green' }} onClick={() => { socket.emit("send_2fa", token); }}>Submit token</button>
       </div>
-      <input
-        type="text"
-        value={token}
-        onChange={(e) => setToken(e.target.value)}
-        placeholder="Token..."
-        style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50 }}
-      />
-      <button style={{ padding: "5px", fontSize: "16px", width: "300px", marginTop: 50 }} onClick={() => { socket.emit("send_2fa", token); }}>Submit token</button>
     </div>
   );
 };
