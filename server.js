@@ -226,6 +226,7 @@ io.on("connection", (socket) => {
       ...process.env,
       FASTLANE_USER: EMAIL,  // Replace with actual email variable
       FASTLANE_PASSWORD: PASSWORD, // Replace with actual password variable
+      FASTLANE_TEAM_ID: 'VR8GZS45PX', // Team id
       FASTLANE_SESSION: fs.existsSync(".fastlane_session") 
           ? fs.readFileSync(".fastlane_session", "utf8").trim() 
           : ""
