@@ -11,8 +11,9 @@ const path = require("path");
 const app = express();
 app.use(cors());
 
-const EMAIL = 'tpandey@gozego.com';
-const PASSWORD = 'Zego1234';
+// please add email and password here.
+const EMAIL = '*********';
+const PASSWORD = '*********';
 
 const server = http.createServer(app);
 const io = socketIo(server, {
