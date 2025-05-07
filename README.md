@@ -1,70 +1,57 @@
-# Getting Started with Create React App
+## [fastlane match](https://docs.fastlane.tools/actions/match/)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+> Do not modify this file, as it gets overwritten every time you run _match_.
 
-## Available Scripts
+This repository contains all your certificates and provisioning profiles needed to build and sign your applications. They are encrypted using OpenSSL via a passphrase.
 
-In the project directory, you can run:
+**Important:** Make sure this repository is set to private and only your team members have access to this repo.
 
-### `npm start`
+### Installation
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Make sure you have the latest version of the Xcode command line tools installed:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```
+xcode-select --install
+```
 
-### `npm test`
+Install _fastlane_ using bundler by following instructions here on [fastlane docs](https://docs.fastlane.tools).
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+or alternatively using 
 
-### `npm run build`
+`brew install fastlane`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Usage
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Navigate to your project folder and run
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+fastlane match appstore
+```
 
-### `npm run eject`
+```
+fastlane match adhoc
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```
+fastlane match development
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```
+fastlane match enterprise
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+For more information open [fastlane match git repo](https://docs.fastlane.tools/actions/match/)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Content
 
-## Learn More
+#### certs
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+This directory contains all your certificates with their private keys
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+#### profiles
 
-### Code Splitting
+This directory contains all provisioning profiles
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+---
 
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+For more information open [fastlane match git repo](https://docs.fastlane.tools/actions/match/)
